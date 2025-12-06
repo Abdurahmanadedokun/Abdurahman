@@ -2,58 +2,87 @@ import streamlit as st
 import plotly.express as px
 import pandas as pd
 
-# -----------------------------
-# PAGE CONFIG (COMPACT LAYOUT)
-# -----------------------------
+# -----------------------
+# PAGE CONFIG
+# -----------------------
 st.set_page_config(
     page_title="Farmer Engagement Dashboard",
     layout="wide"
 )
 
-# Remove default padding (compact look)
+# -----------------------
+# CUSTOM COLOURFUL THEME
+# -----------------------
 st.markdown("""
-    <style>
-        .block-container {
-            padding-top: 1rem;
-            padding-bottom: 0rem;
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }
-    </style>
+<style>
+    .big-header {
+        text-align:center;
+        padding:20px;
+        border-radius:15px;
+        background: linear-gradient(90deg, #34d399, #10b981);
+        color:white;
+        margin-bottom:15px;
+    }
+
+    .kpi-box {
+        background:white;
+        padding:15px;
+        border-radius:15px;
+        border:1px solid #e5e7eb;
+        box-shadow:0 2px 6px rgba(0,0,0,0.05);
+        text-align:center;
+    }
+
+    .section-box {
+        background:white;
+        padding:18px;
+        border-radius:15px;
+        border:1px solid #e5e7eb;
+        box-shadow:0 2px 6px rgba(0,0,0,0.04);
+    }
+</style>
 """, unsafe_allow_html=True)
 
-# -----------------------------
-# USER INFO (Name + ID)
-# -----------------------------
+# -----------------------
+# SAFE USER INFO (NO HTML)
+# -----------------------
 name = "John Adebayo"
 user_id = "FRM-2024-0847"
 
-st.markdown(f"""
-    <div style="text-align: center; margin-bottom: -20px;">
-        <span style="background:#d1fae5; color:#065f46; padding:6px 14px; 
-        border-radius: 12px; font-size: 13px;">
-            Real-time Analytics
-        </span>
-        <h2 style="margin-bottom:-5px;">Farmer Engagement Dashboard</h2>
-        <p style="color:gray; margin-top:0;">Track how farmers interact with the platform</p>
+st.markdown(
+    f"<div class='big-header'><h2>Farmer Engagement Dashboard</h2>"
+    f"<p>Welcome, <b>{name}</b> — ID: <b>{user_id}</b></p></div>",
+    unsafe_allow_html=True
+)
 
-        {name} — {user_id}
-    </div>
-""", unsafe_allow_html=True)
+# -----------------------
+# KPI CARDS (Colourful)
+# -----------------------
+k1, k2, k3, k4 = st.columns(4)
 
-# -----------------------------
-# KPI SECTION (Compact 4 Cards)
-# -----------------------------
-col1, col2, col3, col4 = st.columns(4)
+with k1:
+    st.markdown("<div class='kpi-box'>", unsafe_allow_html=True)
+    st.metric("Total Farmers", "12,458", "+12%")
+    st.markdown("</div>", unsafe_allow_html=True)
 
-col1.metric("Total Farmers", "12,458", "+12%")
-col2.metric("Diagnoses Today", "847", "+28%")
-col3.metric("Active Sessions", "234", "-5%")
-col4.metric("Page Views", "45.2K", "+18%")
+with k2:
+    st.markdown("<div class='kpi-box'>", unsafe_allow_html=True)
+    st.metric("Diagnoses Today", "847", "+28%")
+    st.markdown("</div>", unsafe_allow_html=True)
 
-# -----------------------------
-# WEEKLY ACTIVITY (Compact area chart)
-# -----------------------------
+with k3:
+    st.markdown("<div class='kpi-box'>", unsafe_allow_html=True)
+    st.metric("Active Sessions", "234", "-5%")
+    st.markdown("</div>", unsafe_allow_html=True)
+
+with k4:
+    st.markdown("<div class='kpi-box'>", unsafe_allow_html=True)
+    st.metric("Page Views", "45.2K", "+18%")
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# -----------------------
+# WEEKLY ACTIVITY CHART
+# -----------------------
 weekly_data = pd.DataFrame({
     "Day": ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
     "Diagnoses": [120,180,230,290,310,260,150],
@@ -64,13 +93,14 @@ fig_area = px.area(
     weekly_data,
     x="Day",
     y=["Diagnoses", "Visitors"],
-    title="Weekly Activity",
+    color_discrete_sequence=px.colors.qualitative.Set2,
+    title="Weekly Activity"
 )
-fig_area.update_layout(height=300, margin=dict(l=10,r=10,t=40,b=10))
+fig_area.update_layout(height=300)
 
-# -----------------------------
-# DISEASE DISTRIBUTION PIE
-# -----------------------------
+# -----------------------
+# DISEASE PIE CHART
+# -----------------------
 disease_data = pd.DataFrame({
     "Disease": ["Leaf Blight","Powdery Mildew","Root Rot","Rust","Others"],
     "Value": [35,25,20,12,8]
@@ -81,20 +111,29 @@ fig_pie = px.pie(
     names="Disease",
     values="Value",
     hole=0.5,
+    color_discrete_sequence=px.colors.qualitative.Prism,
     title="Disease Distribution"
 )
-fig_pie.update_layout(height=300, margin=dict(l=10,r=10,t=40,b=10))
+fig_pie.update_layout(height=300)
 
-# -----------------------------
-# LAYOUT: CHARTS
-# -----------------------------
-left, right = st.columns([2,1])
-left.plotly_chart(fig_area, use_container_width=True)
-right.plotly_chart(fig_pie, use_container_width=True)
+# -----------------------
+# CHART LAYOUT
+# -----------------------
+c1, c2 = st.columns([2, 1])
 
-# -----------------------------
-# FARMERS BY REGION (Small Bar Chart)
-# -----------------------------
+with c1:
+    st.markdown("<div class='section-box'>", unsafe_allow_html=True)
+    st.plotly_chart(fig_area, use_container_width=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+with c2:
+    st.markdown("<div class='section-box'>", unsafe_allow_html=True)
+    st.plotly_chart(fig_pie, use_container_width=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# -----------------------
+# REGION BAR + ACTIVITY LIST
+# -----------------------
 region_data = pd.DataFrame({
     "Region": ["North", "South", "East", "West", "Central"],
     "Farmers": [900, 760, 850, 1200, 680]
@@ -105,13 +144,12 @@ fig_bar = px.bar(
     x="Farmers",
     y="Region",
     orientation="h",
+    color="Farmers",
+    color_continuous_scale="Greens",
     title="Farmers by Region"
 )
-fig_bar.update_layout(height=280, margin=dict(l=10,r=10,t=40,b=10))
+fig_bar.update_layout(height=260)
 
-# -----------------------------
-# RECENT ACTIVITY (Compact List)
-# -----------------------------
 recent_activity = [
     ("Farmer #8234", "Wheat disease diagnosis", "2 min ago", "Punjab"),
     ("Farmer #5621", "Viewed market prices", "5 min ago", "Haryana"),
@@ -120,27 +158,16 @@ recent_activity = [
     ("Farmer #7890", "Cotton pest detection", "15 min ago", "Gujarat")
 ]
 
-# -----------------------------
-# LAYOUT: BOTTOM SECTION
-# -----------------------------
-b1, b2 = st.columns([1.2, 1])
+b1, b2 = st.columns([1.3, 1])
 
-b1.plotly_chart(fig_bar, use_container_width=True)
+with b1:
+    st.markdown("<div class='section-box'>", unsafe_allow_html=True)
+    st.plotly_chart(fig_bar, use_container_width=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
 with b2:
-    st.markdown("### Recent Activity")
+    st.markdown("<div class='section-box'>", unsafe_allow_html=True)
+    st.write("### Recent Activity")
     for farmer, activity, time, location in recent_activity:
-        st.markdown(f"""
-            <div style="
-                background:#f9fafb; 
-                padding:10px 12px; 
-                border-radius:10px; 
-                margin-bottom:8px;
-                border:1px solid #e5e7eb;
-            ">
-                <b>{farmer}</b> — {activity}  
-                <div style="color:gray; font-size:12px;">
-                    {time} • {location}
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
+        st.info(f"**{farmer}** — {activity}\n\n⏱ {time} 📍 {location}")
+    st.markdown("</div>", unsafe_allow_html=True)
