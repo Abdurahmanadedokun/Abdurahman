@@ -37,7 +37,7 @@ st.markdown(f"""
         <h2 style="margin-bottom:-5px;">Farmer Engagement Dashboard</h2>
         <p style="color:gray; margin-top:0;">Track how farmers interact with the platform</p>
 
-        <h4 style="margin-top:5px;">👤 {name} — <span style="color:#059669;">{user_id}</span></h4>
+        {name} — {user_id}
     </div>
 """, unsafe_allow_html=True)
 
