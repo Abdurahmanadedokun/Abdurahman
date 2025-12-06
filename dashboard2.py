@@ -134,6 +134,10 @@ with c2:
 # -----------------------
 # REGION BAR + ACTIVITY LIST
 # -----------------------
+# -----------------------
+# REGION BAR (Clean + Bold + Spacious)
+# -----------------------
+
 region_data = pd.DataFrame({
     "Region": ["North", "South", "East", "West", "Central"],
     "Farmers": [900, 760, 850, 1200, 680]
@@ -146,10 +150,24 @@ fig_bar = px.bar(
     orientation="h",
     color="Farmers",
     color_continuous_scale="Greens",
-    title="Farmers by Region"
 )
-fig_bar.update_layout(height=260)
 
+fig_bar.update_layout(
+    title="<b>Farmers by Region</b>",
+    height=330,
+    margin=dict(l=40, r=40, t=60, b=40),
+    xaxis_title="<b>Number of Farmers</b>",
+    yaxis_title="<b>Region</b>",
+    xaxis=dict(tickfont=dict(size=13)),
+    yaxis=dict(tickfont=dict(size=13)),
+)
+
+# ADD MORE SPACE BETWEEN BARS
+fig_bar.update_traces(marker=dict(line=dict(width=1.5, color="white")), width=0.55)
+
+# -----------------------
+# Recent Activity (Bold + Clean)
+# -----------------------
 recent_activity = [
     ("Farmer #8234", "Wheat disease diagnosis", "2 min ago", "Punjab"),
     ("Farmer #5621", "Viewed market prices", "5 min ago", "Haryana"),
@@ -158,7 +176,7 @@ recent_activity = [
     ("Farmer #7890", "Cotton pest detection", "15 min ago", "Gujarat")
 ]
 
-b1, b2 = st.columns([1.3, 1])
+b1, b2 = st.columns([1.4, 1])
 
 with b1:
     st.markdown("<div class='section-box'>", unsafe_allow_html=True)
@@ -167,7 +185,26 @@ with b1:
 
 with b2:
     st.markdown("<div class='section-box'>", unsafe_allow_html=True)
-    st.write("### Recent Activity")
+    st.markdown("### <b>Recent Activity</b>", unsafe_allow_html=True)
+
     for farmer, activity, time, location in recent_activity:
-        st.info(f"**{farmer}** — {activity}\n\n⏱ {time} 📍 {location}")
+        st.markdown(
+            f"""
+            <div style="
+                background:#f0fdf4; 
+                padding:12px; 
+                border-radius:12px; 
+                margin-bottom:10px;
+                border:1px solid #d1fae5;
+                font-size:14px;
+            ">
+                <b>{farmer}</b><br>
+                {activity}<br>
+                <span style="color:gray; font-size:12px;">⏱ {time} • 📍 {location}</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
     st.markdown("</div>", unsafe_allow_html=True)
+
