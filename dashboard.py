@@ -5,6 +5,12 @@ from streamlit_folium import st_folium
 import folium
 
 # -------------------------
+# User Information
+# -------------------------
+USERNAME = "Abdurahman Adedokun"
+USERID = "SF-001"
+
+# -------------------------
 # Sample Data
 # -------------------------
 data = {
@@ -23,22 +29,58 @@ data = {
 df = pd.DataFrame(data)
 
 # -------------------------
-# Streamlit Dashboard
+# Streamlit Setup
 # -------------------------
 st.set_page_config(page_title="SmartFarm Dashboard", layout="wide")
 
-# Top Title
+# -------------------------
+# User Identity Box (Compact)
+# -------------------------
 st.markdown("""
-    <h3 style='text-align:center; color:#0A7F2E;'>
+<style>
+.user-box {
+    background-color: #E9F7EF;
+    padding: 10px 16px;
+    border-radius: 10px;
+    border-left: 4px solid #0A7F2E;
+    margin-bottom: 5px;
+}
+.user-text {
+    font-size: 14px;
+    color: #0A7F2E;
+}
+.user-bold {
+    font-weight: 600;
+}
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown(f"""
+<div class='user-box'>
+    <span class='user-text'>👤 <span class='user-bold'>User:</span> {USERNAME}  
+    &nbsp;&nbsp; | &nbsp;&nbsp; 🔢 <span class='user-bold'>User ID:</span> {USERID}</span>
+</div>
+""", unsafe_allow_html=True)
+
+# -------------------------
+# Title
+# -------------------------
+st.markdown("""
+    <h3 style='text-align:center; color:#0A7F2E; margin-top:-10px;'>
         🌿 SMARTFARM COMPACT DASHBOARD 🌿
     </h3>
 """, unsafe_allow_html=True)
 
 # -------------------------
-# Sidebar Filters
+# Sidebar Filters + user info
 # -------------------------
 with st.sidebar:
+    st.markdown("### 👤 User Info")
+    st.info(f"**Name:** {USERNAME}\n\n**User ID:** {USERID}")
+
+    st.markdown("---")
     st.markdown("### 🔍 Filters")
+
     crop_filter = st.multiselect("Crop", df['Crop'].unique(), df['Crop'].unique())
     location_filter = st.multiselect("Location", df['Location'].unique(), df['Location'].unique())
     disease_filter = st.multiselect("Disease", df['Disease Detected'].unique(), df['Disease Detected'].unique())
@@ -50,7 +92,7 @@ df_filtered = df[
 ]
 
 # -------------------------
-# COMPACT BOX KPI CARDS
+# KPI Cards (Box Style)
 # -------------------------
 st.markdown("""
 <style>
@@ -76,78 +118,33 @@ st.markdown("""
 
 col1, col2, col3 = st.columns(3)
 with col1:
-    st.markdown(f"""
-        <div class='kpi-box'>
-            <div class='kpi-value'>{df_filtered['Farmer ID'].nunique()}</div>
-            <div class='kpi-label'>Total Farms</div>
-        </div>
-    """, unsafe_allow_html=True)
-
+    st.markdown(f"<div class='kpi-box'><div class='kpi-value'>{df_filtered['Farmer ID'].nunique()}</div><div class='kpi-label'>Total Farms</div></div>", unsafe_allow_html=True)
 with col2:
-    st.markdown(f"""
-        <div class='kpi-box'>
-            <div class='kpi-value'>{df_filtered[df_filtered['Disease Detected']!='None']['Farmer ID'].nunique()}</div>
-            <div class='kpi-label'>Farms w/ Disease</div>
-        </div>
-    """, unsafe_allow_html=True)
-
+    st.markdown(f"<div class='kpi-box'><div class='kpi-value'>{df_filtered[df_filtered['Disease Detected']!='None']['Farmer ID'].nunique()}</div><div class='kpi-label'>Farms w/ Disease</div></div>", unsafe_allow_html=True)
 with col3:
-    st.markdown(f"""
-        <div class='kpi-box'>
-            <div class='kpi-value'>{round(df_filtered['Soil Moisture (%)'].mean(),1)}</div>
-            <div class='kpi-label'>Avg Soil Moisture</div>
-        </div>
-    """, unsafe_allow_html=True)
+    st.markdown(f"<div class='kpi-box'><div class='kpi-value'>{round(df_filtered['Soil Moisture (%)'].mean(),1)}</div><div class='kpi-label'>Avg Soil Moisture</div></div>", unsafe_allow_html=True)
 
 # -------------------------
-# COMPACT TABS SECTION
+# Tabs
 # -------------------------
 tabs = st.tabs(["📊 Charts", "🗺️ Map", "📁 Table"])
 
-# -------------------------
 # Charts Tab
-# -------------------------
 with tabs[0]:
-    st.markdown("### 📊 Compact Crop Charts")
+    st.subheader("📈 Crop Trend")
+    metric = st.selectbox("Select Metric", ["Soil Moisture (%)", "Temperature (°C)", "Rainfall (mm)"])
 
-    selection = st.selectbox("Choose Parameter", ["Soil Moisture (%)", "Temperature (°C)", "Rainfall (mm)"])
-
-    fig = px.line(
-        df_filtered,
-        x="Date",
-        y=selection,
-        color="Crop",
-        markers=True,
-        template="plotly_white"
-    )
+    fig = px.line(df_filtered, x="Date", y=metric, color="Crop", markers=True, template="plotly_white")
     st.plotly_chart(fig, use_container_width=True)
 
-    # Disease Chart (if exists)
-    df_dz = df_filtered[df_filtered["Disease Detected"] != "None"]
-    if not df_dz.empty:
-        st.markdown("### 🦠 Disease Severity")
-        fig2 = px.bar(
-            df_dz,
-            x="Farmer Name",
-            y="Disease Severity",
-            color="Disease Detected",
-            text="Disease Severity",
-            template="plotly_white"
-        )
-        fig2.update_traces(textposition="outside")
-        st.plotly_chart(fig2, use_container_width=True)
-
-# -------------------------
 # Map Tab
-# -------------------------
 with tabs[1]:
-    st.markdown("### 🗺️ Farm Location Map (Compact)")
-
+    st.subheader("🗺️ Farm Map (Compact)")
     m = folium.Map(location=[9.0,7.0], zoom_start=5, tiles="cartodbpositron")
 
     for i, row in df_filtered.iterrows():
-        lat = 7 + i * 0.4
-        lon = 9 + i * 0.4
+        lat = 7 + i*0.4
+        lon = 9 + i*0.4
         color = "green" if row["Disease Severity"] == 0 else "orange" if row["Disease Severity"] <= 2 else "red"
 
         folium.CircleMarker(
@@ -155,23 +152,13 @@ with tabs[1]:
             radius=6,
             color=color,
             fill=True,
-            fill_opacity=0.9,
+            fill_opacity=0.8,
             popup=f"{row['Farmer Name']} – {row['Crop']}",
-            tooltip=row["Farmer Name"]
         ).add_to(m)
 
     st_folium(m, width=330, height=350)
 
-# -------------------------
-# Data Table Tab
-# -------------------------
+# Table Tab
 with tabs[2]:
-    st.markdown("### 📁 Compact Farm Data")
-    st.dataframe(
-        df_filtered[[
-            "Farmer Name","Location","Crop",
-            "Soil Moisture (%)","Temperature (°C)",
-            "Rainfall (mm)","Disease Detected","Disease Severity"
-        ]],
-        height=300
-    )
+    st.subheader("📁 Farm Data Table")
+    st.dataframe(df_filtered, height=300)
