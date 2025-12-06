@@ -1,164 +1,146 @@
 import streamlit as st
-import pandas as pd
 import plotly.express as px
-from streamlit_folium import st_folium
-import folium
+import pandas as pd
 
-# -------------------------
-# User Information
-# -------------------------
-USERNAME = "Abdurahman Adedokun"
-USERID = "SF-001"
+# -----------------------------
+# PAGE CONFIG (COMPACT LAYOUT)
+# -----------------------------
+st.set_page_config(
+    page_title="Farmer Engagement Dashboard",
+    layout="wide"
+)
 
-# -------------------------
-# Sample Data
-# -------------------------
-data = {
-    'Farmer ID': ['F001','F002','F003','F004','F005'],
-    'Farmer Name': ['Ali','Bola','Chidi','Dami','Emeka'],
-    'Location': ['Ife','Ibadan','Lagos','Kano','Abuja'],
-    'Crop': ['Maize','Cassava','Rice','Maize','Cassava'],
-    'Soil Moisture (%)': [45, 50, 38, 60, 55],
-    'Temperature (°C)': [30, 32, 29, 33, 31],
-    'Rainfall (mm)': [100, 120, 80, 150, 110],
-    'Disease Detected': ['None','Fungal','None','Bacterial','None'],
-    'Disease Severity': [0,2,0,3,0],
-    'Recommended Action': ['N/A','Spray fungicide','N/A','Remove infected','N/A'],
-    'Date': pd.to_datetime(['2025-12-01','2025-12-02','2025-12-03','2025-12-04','2025-12-05'])
-}
-df = pd.DataFrame(data)
-
-# -------------------------
-# Streamlit Setup
-# -------------------------
-st.set_page_config(page_title="SmartFarm Dashboard", layout="wide")
-
-# -------------------------
-# User Identity Box (Compact)
-# -------------------------
+# Remove default padding (compact look)
 st.markdown("""
-<style>
-.user-box {
-    background-color: #E9F7EF;
-    padding: 10px 16px;
-    border-radius: 10px;
-    border-left: 4px solid #0A7F2E;
-    margin-bottom: 5px;
-}
-.user-text {
-    font-size: 14px;
-    color: #0A7F2E;
-}
-.user-bold {
-    font-weight: 600;
-}
-</style>
+    <style>
+        .block-container {
+            padding-top: 1rem;
+            padding-bottom: 0rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+    </style>
 """, unsafe_allow_html=True)
+
+# -----------------------------
+# USER INFO (Name + ID)
+# -----------------------------
+name = "John Adebayo"
+user_id = "FRM-2024-0847"
 
 st.markdown(f"""
-<div class='user-box'>
-    <span class='user-text'>👤 <span class='user-bold'>User:</span> {USERNAME}  
-    &nbsp;&nbsp; | &nbsp;&nbsp; 🔢 <span class='user-bold'>User ID:</span> {USERID}</span>
-</div>
+    <div style="text-align: center; margin-bottom: -20px;">
+        <span style="background:#d1fae5; color:#065f46; padding:6px 14px; 
+        border-radius: 12px; font-size: 13px;">
+            Real-time Analytics
+        </span>
+        <h2 style="margin-bottom:-5px;">Farmer Engagement Dashboard</h2>
+        <p style="color:gray; margin-top:0;">Track how farmers interact with the platform</p>
+
+        <h4 style="margin-top:5px;">👤 {name} — <span style="color:#059669;">{user_id}</span></h4>
+    </div>
 """, unsafe_allow_html=True)
 
-# -------------------------
-# Title
-# -------------------------
-st.markdown("""
-    <h3 style='text-align:center; color:#0A7F2E; margin-top:-10px;'>
-        🌿 SMARTFARM COMPACT DASHBOARD 🌿
-    </h3>
-""", unsafe_allow_html=True)
+# -----------------------------
+# KPI SECTION (Compact 4 Cards)
+# -----------------------------
+col1, col2, col3, col4 = st.columns(4)
 
-# -------------------------
-# Sidebar Filters + user info
-# -------------------------
-with st.sidebar:
-    st.markdown("### 👤 User Info")
-    st.info(f"**Name:** {USERNAME}\n\n**User ID:** {USERID}")
+col1.metric("Total Farmers", "12,458", "+12%")
+col2.metric("Diagnoses Today", "847", "+28%")
+col3.metric("Active Sessions", "234", "-5%")
+col4.metric("Page Views", "45.2K", "+18%")
 
-    st.markdown("---")
-    st.markdown("### 🔍 Filters")
+# -----------------------------
+# WEEKLY ACTIVITY (Compact area chart)
+# -----------------------------
+weekly_data = pd.DataFrame({
+    "Day": ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
+    "Diagnoses": [120,180,230,290,310,260,150],
+    "Visitors":  [350,420,500,630,700,560,400]
+})
 
-    crop_filter = st.multiselect("Crop", df['Crop'].unique(), df['Crop'].unique())
-    location_filter = st.multiselect("Location", df['Location'].unique(), df['Location'].unique())
-    disease_filter = st.multiselect("Disease", df['Disease Detected'].unique(), df['Disease Detected'].unique())
+fig_area = px.area(
+    weekly_data,
+    x="Day",
+    y=["Diagnoses", "Visitors"],
+    title="Weekly Activity",
+)
+fig_area.update_layout(height=300, margin=dict(l=10,r=10,t=40,b=10))
 
-df_filtered = df[
-    (df['Crop'].isin(crop_filter)) &
-    (df['Location'].isin(location_filter)) &
-    (df['Disease Detected'].isin(disease_filter))
+# -----------------------------
+# DISEASE DISTRIBUTION PIE
+# -----------------------------
+disease_data = pd.DataFrame({
+    "Disease": ["Leaf Blight","Powdery Mildew","Root Rot","Rust","Others"],
+    "Value": [35,25,20,12,8]
+})
+
+fig_pie = px.pie(
+    disease_data,
+    names="Disease",
+    values="Value",
+    hole=0.5,
+    title="Disease Distribution"
+)
+fig_pie.update_layout(height=300, margin=dict(l=10,r=10,t=40,b=10))
+
+# -----------------------------
+# LAYOUT: CHARTS
+# -----------------------------
+left, right = st.columns([2,1])
+left.plotly_chart(fig_area, use_container_width=True)
+right.plotly_chart(fig_pie, use_container_width=True)
+
+# -----------------------------
+# FARMERS BY REGION (Small Bar Chart)
+# -----------------------------
+region_data = pd.DataFrame({
+    "Region": ["North", "South", "East", "West", "Central"],
+    "Farmers": [900, 760, 850, 1200, 680]
+})
+
+fig_bar = px.bar(
+    region_data,
+    x="Farmers",
+    y="Region",
+    orientation="h",
+    title="Farmers by Region"
+)
+fig_bar.update_layout(height=280, margin=dict(l=10,r=10,t=40,b=10))
+
+# -----------------------------
+# RECENT ACTIVITY (Compact List)
+# -----------------------------
+recent_activity = [
+    ("Farmer #8234", "Wheat disease diagnosis", "2 min ago", "Punjab"),
+    ("Farmer #5621", "Viewed market prices", "5 min ago", "Haryana"),
+    ("Farmer #9012", "Rice leaf analysis", "8 min ago", "West Bengal"),
+    ("Farmer #3456", "New registration", "12 min ago", "Maharashtra"),
+    ("Farmer #7890", "Cotton pest detection", "15 min ago", "Gujarat")
 ]
 
-# -------------------------
-# KPI Cards (Box Style)
-# -------------------------
-st.markdown("""
-<style>
-.kpi-box {
-    background-color: #ffffff;
-    padding: 12px;
-    border-radius: 12px;
-    border: 1px solid #e0e0e0;
-    text-align: center;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-}
-.kpi-value {
-    font-size: 22px;
-    font-weight: bold;
-    color: #0A7F2E;
-}
-.kpi-label {
-    font-size: 13px;
-    color: #333;
-}
-</style>
-""", unsafe_allow_html=True)
+# -----------------------------
+# LAYOUT: BOTTOM SECTION
+# -----------------------------
+b1, b2 = st.columns([1.2, 1])
 
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.markdown(f"<div class='kpi-box'><div class='kpi-value'>{df_filtered['Farmer ID'].nunique()}</div><div class='kpi-label'>Total Farms</div></div>", unsafe_allow_html=True)
-with col2:
-    st.markdown(f"<div class='kpi-box'><div class='kpi-value'>{df_filtered[df_filtered['Disease Detected']!='None']['Farmer ID'].nunique()}</div><div class='kpi-label'>Farms w/ Disease</div></div>", unsafe_allow_html=True)
-with col3:
-    st.markdown(f"<div class='kpi-box'><div class='kpi-value'>{round(df_filtered['Soil Moisture (%)'].mean(),1)}</div><div class='kpi-label'>Avg Soil Moisture</div></div>", unsafe_allow_html=True)
+b1.plotly_chart(fig_bar, use_container_width=True)
 
-# -------------------------
-# Tabs
-# -------------------------
-tabs = st.tabs(["📊 Charts", "🗺️ Map", "📁 Table"])
-
-# Charts Tab
-with tabs[0]:
-    st.subheader("📈 Crop Trend")
-    metric = st.selectbox("Select Metric", ["Soil Moisture (%)", "Temperature (°C)", "Rainfall (mm)"])
-
-    fig = px.line(df_filtered, x="Date", y=metric, color="Crop", markers=True, template="plotly_white")
-    st.plotly_chart(fig, use_container_width=True)
-
-# Map Tab
-with tabs[1]:
-    st.subheader("🗺️ Farm Map (Compact)")
-    m = folium.Map(location=[9.0,7.0], zoom_start=5, tiles="cartodbpositron")
-
-    for i, row in df_filtered.iterrows():
-        lat = 7 + i*0.4
-        lon = 9 + i*0.4
-        color = "green" if row["Disease Severity"] == 0 else "orange" if row["Disease Severity"] <= 2 else "red"
-
-        folium.CircleMarker(
-            [lat, lon],
-            radius=6,
-            color=color,
-            fill=True,
-            fill_opacity=0.8,
-            popup=f"{row['Farmer Name']} – {row['Crop']}",
-        ).add_to(m)
-
-    st_folium(m, width=330, height=350)
-
-# Table Tab
-with tabs[2]:
-    st.subheader("📁 Farm Data Table")
-    st.dataframe(df_filtered, height=300)
+with b2:
+    st.markdown("### Recent Activity")
+    for farmer, activity, time, location in recent_activity:
+        st.markdown(f"""
+            <div style="
+                background:#f9fafb; 
+                padding:10px 12px; 
+                border-radius:10px; 
+                margin-bottom:8px;
+                border:1px solid #e5e7eb;
+            ">
+                <b>{farmer}</b> — {activity}  
+                <div style="color:gray; font-size:12px;">
+                    {time} • {location}
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
